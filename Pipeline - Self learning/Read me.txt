@@ -1,0 +1,38 @@
+================================================================================
+PROJECT: Self-learning AI for Geopolymer Strength Prediction from Microstructure
+
+Authors:
+Dheeraj Dhruva Kumar1, Kazi Sazzad Hossen1, Toms Valdemars Eiduks2, Dan Meng1, Andrew Shishkin2, Navid Ranjbar1*
+
+1 Department of Civil and Mechanical Engineering, Technical University of Denmark, 2800 Kgs, Denmark.
+2 Institute of Physics and Materials Science, Faculty of Natural Sciences and Technology, Riga Technical University, Riga, LV-1048, Latvia
+
+================================================================================
+
+DESCRIPTION:
+This script enhances a pre-trained supervised model by leveraging unlabeled 
+synthetic (GAN-generated) data. It uses a Self-Learning loop where the model 
+generates its own labels for unlabeled data to improve generalization.
+
+CORE SSL LOGIC:
+1. PSEUDO-LABELING: The model predicts classes for unlabeled synthetic images. 
+   Only pixels exceeding a specific 'Confidence Threshold' (e.g., 0.99) are used.
+2. TEMPERATURE SCALING: Uses a Temperature parameter (T) to soften or sharpen 
+   probability distributions during prediction.
+3. JOINT TRAINING: In each round, the model is trained simultaneously on:
+   - Labeled Data: Standard supervised loss (Weighted x2).
+   - Pseudo-labeled Data: Masked loss, focusing only on high-confidence pixels.
+
+KEY FEATURES:
+- Custom Training Steps: Optimized using @tf.function for speed.
+- Early Stopping: Monitors Test IoU with patience of 50 rounds to prevent over-fitting on pseudo-labels.
+
+OUTPUTS:
+- Best_self_learned_model.keras: The final optimized segmentation model.
+- SSL_training_log.csv: Numerical history of IoU and pixel confidence.
+- Visual Check Plots: PNG files for manual inspection of pseudo-label quality.
+
+USAGE:
+Ensure 'supervised_model.keras' from the supervised U-net script is present in the 
+root directory before execution.
+================================================================================
