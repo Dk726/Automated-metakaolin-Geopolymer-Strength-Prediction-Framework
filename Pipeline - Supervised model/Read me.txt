@@ -1,0 +1,32 @@
+================================================================================
+PROJECT: Self-learning AI for Geopolymer Strength Prediction from Microstructure
+Authors: Dheeraj Dhruva Kumar1, Kazi Sazzad Hossen1, Toms Valdemars Eiduks2, Dan Meng1, Andrew Shishkin2, Navid Ranjbar1*
+
+1 Department of Civil and Mechanical Engineering, Technical University of Denmark, 2800 Kgs, Denmark.
+2 Institute of Physics and Materials Science, Faculty of Natural Sciences and Technology, Riga Technical University, Riga, LV-1048, Latvia
+
+================================================================================
+
+DESCRIPTION:
+This script performs the initial supervised training of a U-Net architecture 
+to segment material microstructures into five distinct classes: Porosity, Gel, 
+Aggregates, Unreacted phases, and Impurities.
+
+CORE FUNCTIONALITY:
+1. DATA LOADING: Processes 512x512 image patches and corresponding labels 
+   from local directories.
+2. PERFORMANCE METRICS: Implements a custom MeanIoU metric (MeanIoU_custom) 
+   to monitor multi-class segmentation accuracy.
+
+
+OUTPUTS:
+- supervised_model.keras: The trained weights used as the baseline for SSL.
+- Training plots: Visualization of IoU and loss curves.
+
+REQUIREMENTS:
+- TensorFlow 2.x
+- Keras
+- OpenCV
+- Scikit-Learn
+- Matplotlib
+================================================================================
