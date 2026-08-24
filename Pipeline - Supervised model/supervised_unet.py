@@ -16,31 +16,21 @@ tf.random.set_seed(seed_value)
 # --- 1. Data Preprocessing Functions ---
 
 def process_images(path, l_path):
-    """Processes 512x512 images"""
     images = []
     labels = []
-    
     # Process Images
     for img_path in sorted(glob.glob(path)):
         img = cv2.imread(img_path, 0) # Grayscale
         if img is None: continue
-        for i in [0, 256]:
-            for j in [0, 256]:
-                patch = img[i:i+256, j:j+256]
-                images.append(patch)
-                
+        images.append(img)          
     # Process Labels
     for lab_path in sorted(glob.glob(l_path)):
         lab = cv2.imread(lab_path, 0) # Grayscale
         if lab is None: continue
-        for i in [0, 256]:
-            for j in [0, 256]:
-                patch = lab[i:i+256, j:j+256]
-                labels.append(patch)
-                
+        labels.append(lab)            
     return np.array(images), np.array(labels)
 
-# Define paths (Adjust these to your Azure VM paths)
+# Define paths
 image_path = "path/to/images/*.png*" 
 label_path = "path/to/labels/*.png*"
 
@@ -58,16 +48,29 @@ train_mask = train_mask_encoded.reshape(n, h, w)
 print(f"Unique classes: {np.unique(train_mask)}")
 
 # Train/Test Split
-X_train, X_test, Y_train, Y_test = train_test_split(
+x_train, x_test, y_train, y_test = train_test_split(
     real_img, train_mask, test_size=0.50, random_state=18, shuffle=True
 )
 
-# Expand dims for Grayscale channel (C=1)
+def patching(img_array):
+    images = []
+    for img in img_array:
+        for i in [0, 256]:
+            for j in [0, 256]:
+                patch = img[i:i+256, j:j+256]
+                images.append(patch)
+    return images
+
+X_train = patching(x_train)
+X_test = patching(x_test)
+Y_train = patching(y_train)
+Y_test = patching(y_test)
+
+# Expand dims for Grayscale channel
 X_train = np.expand_dims(X_train, axis=-1)
 X_test = np.expand_dims(X_test, axis=-1)
 
 # --- 3. Custom Metrics ---
-
 class MeanIoU_custom(tf.keras.metrics.Metric):
     def __init__(self, num_classes=5, name='mean_iou', **kwargs):
         super().__init__(name=name, **kwargs)
