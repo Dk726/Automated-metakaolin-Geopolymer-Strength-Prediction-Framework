@@ -22,22 +22,20 @@ policy = mixed_precision.Policy('mixed_float16')
 mixed_precision.set_global_policy(policy)
 
 # --- DATA PROCESSING ---
-def process_images(path, l_path): #Currently set to process 512x512 images
+def process_images(path, l_path):
     images = []
-    labels = []
+    labels = [] 
+    # Process Images
     for img_path in sorted(glob.glob(path)):
-        img = cv2.imread(img_path, 0)
-        for i in (0, 256):
-            for j in (0, 256):
-                patch = img[i:i+256, j:j+256]
-                images.append(patch)
+        img = cv2.imread(img_path, 0) # Grayscale
+        if img is None: continue
+        images.append(img)            
+    # Process Labels
     for lab_path in sorted(glob.glob(l_path)):
-        lab = cv2.imread(lab_path, 0)
-        for i in (0, 256):
-            for j in (0, 256):
-                patch = lab[i:i+256, j:j+256]
-                labels.append(patch)
-    return images, labels
+        lab = cv2.imread(lab_path, 0) # Grayscale
+        if lab is None: continue
+        labels.append(lab)           
+    return np.array(images), np.array(labels)
 
 # Define paths and process
 image_path = "path/to/images/*.png*" 
@@ -57,9 +55,27 @@ train_mask = train_mask_encoded.reshape(n, h, w)
 print(f"Unique classes: {np.unique(train_mask)}")
 
 # --- TRAIN TEST SPLIT ---
-X_train, X_test, Y_train, Y_test = train_test_split(
+x_train, x_test, y_train, y_test = train_test_split(
     real_img, train_mask, test_size=0.50, random_state=18, shuffle=True
 )
+
+def patching(img_array):
+    images = []
+    for img in img_array:
+        for i in [0, 256]:
+            for j in [0, 256]:
+                patch = img[i:i+256, j:j+256]
+                images.append(patch)
+    return images
+
+X_train = patching(x_train)
+X_test = patching(x_test)
+Y_train = patching(y_train)
+Y_test = patching(y_test)
+
+# Expand dims for Grayscale channel (C=1)
+X_train = np.expand_dims(X_train, axis=-1)
+X_test = np.expand_dims(X_test, axis=-1)
 
 # --- GAN / SYNTHETIC DATA LOADING ---
 fake_imgs = []
